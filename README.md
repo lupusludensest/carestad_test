@@ -11,6 +11,12 @@ npm install @playwright/test
 // Run the test
 node .\hello_playwright.js
 
+// Run the unattended suite (interactive authentication tests are excluded)
+npm test
+
+// Run the interactive authentication tests in a visible browser
+npm run test:interactive
+
 // Check if playwright is here
 npm list playwright
 npm list @playwright/test

@@ -90,7 +90,7 @@ test.describe('Carestead', () => {
     await expect(passwordInput).toHaveValue(CARESTEAD_PASSWORD || 'test-password');
   });
 
-  test('logs out after 90 seconds of inactivity', async ({ page }) => {
+  test('logs out after 90 seconds of inactivity @interactive', async ({ page }) => {
     test.skip(process.env.INTERACTIVE_LOGIN !== 'true', 'Set INTERACTIVE_LOGIN=true to run the 90-second session test.');
     const loginTimeout = 120000;
     const inactivityTimeout = 90000;
@@ -142,7 +142,7 @@ test.describe('Carestead', () => {
     }
   });
 
-  test('verifies the authenticated dashboard after Google sign-in', async ({ page }) => {
+  test('verifies the authenticated dashboard after Google sign-in @interactive', async ({ page }) => {
     test.skip(process.env.INTERACTIVE_LOGIN !== 'true', 'Run with INTERACTIVE_LOGIN=true for manual Google authentication.');
 
     await page.goto(`${CARESTEAD_APP_URL}/login`, { waitUntil: 'networkidle' });
