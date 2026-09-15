@@ -78,7 +78,7 @@ test.describe('Carestead', () => {
     await expect(emailInput).toHaveValue(CARESTEAD_EMAIL);
     await expect(passwordInput).toHaveValue(CARESTEAD_PASSWORD);
 
-    await expect(page.getByRole('button', { name: 'Sign in' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeDisabled();
   });
 
   test('masks the password input', async ({ page }) => {
@@ -100,7 +100,7 @@ test.describe('Carestead', () => {
 
     const emailInput = page.getByLabel('Email');
     const passwordInput = page.getByLabel('Password');
-    const signInButton = page.getByRole('button', { name: 'Sign in' });
+    const signInButton = page.getByRole('button', { name: 'Sign in', exact: true });
 
     await emailInput.fill(CARESTEAD_EMAIL);
     await passwordInput.fill(CARESTEAD_PASSWORD);
