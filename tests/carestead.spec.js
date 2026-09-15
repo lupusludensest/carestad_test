@@ -1,4 +1,6 @@
 const { test, expect } = require('./test-base');
+const { HomePage } = require('../pages/home-page');
+const { LoginPage } = require('../pages/login-page');
 
 process.loadEnvFile?.();
 
@@ -9,22 +11,11 @@ const CARESTEAD_PASSWORD = process.env.CARESTEAD_PASSWORD;
 
 test.describe('Carestead', () => {
   test('navigates through Products, Plans, and FAQ', async ({ page }) => {
-    await page.goto(CARESTEAD_URL, { waitUntil: 'networkidle' });
-
-    const navigation = page.locator('header');
-    await navigation.getByRole('link', { name: 'Products' }).click();
-    await expect(page).toHaveURL(/#products$/);
-    await expect(page.getByRole('heading', { name: 'Six tools. One roof.' })).toBeVisible();
-
-    await navigation.getByRole('link', { name: 'Plans' }).click();
-    await expect(page).toHaveURL(/#pricing$/);
-    await expect(page.getByRole('heading', { name: 'Free', exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Team', exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Enterprise', exact: true })).toBeVisible();
-
-    await navigation.getByRole('link', { name: 'FAQ' }).click();
-    await expect(page).toHaveURL(/#faq$/);
-    await expect(page.getByRole('heading', { name: 'The short answers.' })).toBeVisible();
+    const homePage = new HomePage(page, CARESTEAD_URL);
+    await homePage.open();
+    await homePage.openProducts();
+    await homePage.openPlans();
+    await homePage.openFaq();
   });
 
   test('opens every FAQ question and displays its answer', async ({ page }) => {
@@ -51,34 +42,26 @@ test.describe('Carestead', () => {
   });
 
   test('opens the Carestead sign-in page with the expected controls', async ({ page }) => {
-    await page.goto(CARESTEAD_URL, { waitUntil: 'networkidle' });
+    const homePage = new HomePage(page, CARESTEAD_URL);
+    const loginPage = new LoginPage(page, CARESTEAD_APP_URL);
+
+    await homePage.open();
 
     await Promise.all([
       page.waitForURL(`${CARESTEAD_APP_URL}/login`),
-      page.getByRole('link', { name: 'Sign in' }).first().click(),
+      homePage.openLoginPage(),
     ]);
 
-    await expect(page).toHaveURL(`${CARESTEAD_APP_URL}/login`);
-    await expect(page).toHaveTitle(/Carestead/);
-    await expect(page.getByRole('heading', { name: 'Sign in to Carestead' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible();
-    await expect(page.getByLabel('Email')).toBeVisible();
-    await expect(page.getByLabel('Password')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Create account' })).toHaveAttribute('href', '/signup');
+    await loginPage.expectVisible();
+    await loginPage.expectTitle('Carestead');
+    await loginPage.expectUrl(`${CARESTEAD_APP_URL}/login`);
   });
 
   test('requires human verification before credential submission', async ({ page }) => {
-    await page.goto(`${CARESTEAD_APP_URL}/login`, { waitUntil: 'networkidle' });
-
-    const emailInput = page.getByLabel('Email');
-    const passwordInput = page.getByLabel('Password');
-    await emailInput.fill(CARESTEAD_EMAIL);
-    await passwordInput.fill(CARESTEAD_PASSWORD);
-    await expect(emailInput).toHaveValue(CARESTEAD_EMAIL);
-    await expect(passwordInput).toHaveValue(CARESTEAD_PASSWORD);
-
-    await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeDisabled();
+    const loginPage = new LoginPage(page, CARESTEAD_APP_URL);
+    await loginPage.open();
+    await loginPage.login(CARESTEAD_EMAIL, CARESTEAD_PASSWORD);
+    await loginPage.expectSubmitDisabled();
   });
 
   test('masks the password input', async ({ page }) => {
