@@ -7,10 +7,9 @@ class LoginPage extends BasePage {
     this.page = page;
     this.heading = page.getByRole('heading', { name: 'Sign in to Carestead' });
     this.emailInput = page.getByLabel('Email');
-    this.passwordInput = page.getByLabel('Password');
+    this.passwordInput = page.getByLabel('Password', { exact: true });
     this.googleButton = page.getByRole('button', { name: 'Continue with Google' });
     this.signInButton = page.getByRole('button', { name: 'Sign in', exact: true });
-    this.createAccountLink = page.getByRole('link', { name: 'Create account' });
   }
 
   async open() {
@@ -23,7 +22,6 @@ class LoginPage extends BasePage {
     await expect(this.emailInput).toBeVisible();
     await expect(this.passwordInput).toBeVisible();
     await expect(this.signInButton).toBeVisible();
-    await expect(this.createAccountLink).toHaveAttribute('href', '/signup');
   }
 
   async login(email, password) {

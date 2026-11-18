@@ -25,7 +25,11 @@ test.describe('Carestead', () => {
     await expect(page).toHaveURL(/#faq$/);
     await expect(page.getByRole('heading', { name: 'The short answers.' })).toBeVisible();
 
-    const questions = page.locator('#faq details');
+    const moreQuestions = page.locator('#faq details:has(details) > summary');
+    await expect(moreQuestions).toHaveCount(1);
+    await moreQuestions.click();
+
+    const questions = page.locator('#faq details:not(:has(details))');
     await expect(questions).toHaveCount(14);
 
     for (let index = 0; index < await questions.count(); index += 1) {
@@ -53,7 +57,7 @@ test.describe('Carestead', () => {
     ]);
 
     await loginPage.expectVisible();
-    await loginPage.expectTitle('Carestead');
+    await loginPage.expectTitle('Sign in - Carestead');
     await loginPage.expectUrl(`${CARESTEAD_APP_URL}/login`);
   });
 
@@ -67,7 +71,7 @@ test.describe('Carestead', () => {
   test('masks the password input', async ({ page }) => {
     await page.goto(`${CARESTEAD_APP_URL}/login`, { waitUntil: 'networkidle' });
 
-    const passwordInput = page.getByLabel('Password');
+    const passwordInput = page.getByLabel('Password', { exact: true });
     await expect(passwordInput).toHaveAttribute('type', 'password');
     await passwordInput.fill(CARESTEAD_PASSWORD || 'test-password');
     await expect(passwordInput).toHaveValue(CARESTEAD_PASSWORD || 'test-password');
@@ -82,7 +86,7 @@ test.describe('Carestead', () => {
     await page.goto(`${CARESTEAD_APP_URL}/login`, { waitUntil: 'networkidle' });
 
     const emailInput = page.getByLabel('Email');
-    const passwordInput = page.getByLabel('Password');
+    const passwordInput = page.getByLabel('Password', { exact: true });
     const signInButton = page.getByRole('button', { name: 'Sign in', exact: true });
 
     await emailInput.fill(CARESTEAD_EMAIL);
@@ -91,6 +95,7 @@ test.describe('Carestead', () => {
     await expect(passwordInput).toHaveValue(CARESTEAD_PASSWORD);
 
     await expect(signInButton).toBeDisabled();
+    console.log('Manual step: complete the human-verification challenge, then resume in Playwright Inspector.');
     await page.pause();
     await expect(signInButton).toBeEnabled({ timeout: loginTimeout });
     await signInButton.click();
@@ -138,9 +143,10 @@ test.describe('Carestead', () => {
     await googleEmailInput.fill(CARESTEAD_EMAIL);
     await expect(googleEmailInput).toHaveValue(CARESTEAD_EMAIL);
 
+    console.log('Manual step: finish Google sign-in and return to Carestead, then resume in Playwright Inspector.');
     await page.pause();
 
-    await page.waitForURL(new RegExp(`^${CARESTEAD_APP_URL.replace('.', '\\.')}`), {
+    await page.waitForURL(url => url.origin === CARESTEAD_APP_URL, {
       timeout: 120000,
     });
     await expect(page.getByText(/Hi, .+/)).toBeVisible();
@@ -161,18 +167,14 @@ test.describe('Carestead', () => {
     await expect(page.getByText('Account security')).toBeVisible();
   });
 
-  test('offers Google and email account creation', async ({ page }) => {
-    await page.goto(`${CARESTEAD_APP_URL}/login`, { waitUntil: 'networkidle' });
-    await page.getByRole('link', { name: 'Create account' }).click();
-
-    await expect(page).toHaveURL(/\/signup$/);
+  test('explains that account creation is invite-only', async ({ page }) => {
+    await page.goto(`${CARESTEAD_APP_URL}/signup`, { waitUntil: 'networkidle' });
     await expect(page).toHaveURL(`${CARESTEAD_APP_URL}/signup`);
-    await expect(page.getByRole('heading', { name: 'Create your Carestead account' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible();
-    await expect(page.getByLabel('Email')).toBeVisible();
-    await expect(page.getByLabel('Password')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Create account with email' })).toBeVisible();
-    await expect(page.getByText(/Already have an account\? Sign in/)).toBeVisible();
+    await expect(page).toHaveTitle('Create an account - Carestead');
+    await expect(page.getByRole('heading', {
+      name: 'Carestead is invite-only. Ask your church for an invitation or a join code.',
+    })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/login');
   });
 
   test('opens the early-access form and validates required fields', async ({ page }) => {

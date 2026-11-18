@@ -11,7 +11,7 @@ module.exports = defineConfig({
   workers: 4,
   use: {
     headless: true,
-    ignoreHTTPSErrors: true,
+    ignoreHTTPSErrors: false,
     navigationTimeout: 60000,
     viewport: { width: 1280, height: 800 },
     screenshot: 'only-on-failure',

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "test": "playwright test --grep-invert @interactive",
-    "test:interactive": "INTERACTIVE_LOGIN=true playwright test --grep @interactive --headed --workers=1"
+    "test:interactive": "INTERACTIVE_LOGIN=true playwright test --grep @interactive --project=chromium --headed --workers=1"
   },
   "devDependencies": {
     "playwright": "^1.50.1"
